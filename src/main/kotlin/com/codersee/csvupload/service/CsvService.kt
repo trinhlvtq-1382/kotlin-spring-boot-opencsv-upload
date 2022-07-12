@@ -2,6 +2,8 @@ package com.codersee.csvupload.service
 
 import com.codersee.csvupload.exception.BadRequestException
 import com.codersee.csvupload.exception.CsvImportException
+import com.codersee.csvupload.model.Company
+import com.codersee.csvupload.model.CompanyList
 import com.codersee.csvupload.model.User
 import com.opencsv.bean.CsvToBean
 import com.opencsv.bean.CsvToBeanBuilder
@@ -10,19 +12,21 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import java.nio.charset.Charset
 
 @Service
 class CsvService {
 
-    fun uploadCsvFile(file: MultipartFile): List<User> {
+    fun uploadCsvFile(file: MultipartFile): CompanyList {
         throwIfFileEmpty(file)
         var fileReader: BufferedReader? = null
 
         try {
-            fileReader = BufferedReader(InputStreamReader(file.inputStream))
+            val charsetName = Charset.forName("SHIFT-JIS").name()
+            fileReader = BufferedReader(InputStreamReader(file.inputStream, charsetName))
             val csvToBean = createCSVToBean(fileReader)
 
-            return csvToBean.parse()
+            return CompanyList(csvToBean.parse())
         } catch (ex: Exception) {
             throw CsvImportException("Error during csv import")
         } finally {
@@ -35,9 +39,9 @@ class CsvService {
             throw BadRequestException("Empty file")
     }
 
-    private fun createCSVToBean(fileReader: BufferedReader?): CsvToBean<User> =
-        CsvToBeanBuilder<User>(fileReader)
-            .withType(User::class.java)
+    private fun createCSVToBean(fileReader: BufferedReader?): CsvToBean<Company> =
+        CsvToBeanBuilder<Company>(fileReader)
+            .withType(Company::class.java)
             .withIgnoreLeadingWhiteSpace(true)
             .build()
 

@@ -1,12 +1,12 @@
 package com.codersee.csvupload.controller
 
+import com.codersee.csvupload.model.Company
+import com.codersee.csvupload.model.CompanyList
+import com.codersee.csvupload.model.Healthz
 import com.codersee.csvupload.model.User
 import com.codersee.csvupload.service.CsvService
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
@@ -18,10 +18,17 @@ class CsvController(
     @PostMapping
     fun uploadCsvFile(
         @RequestParam("file") file: MultipartFile
-    ): ResponseEntity<List<User>> {
+    ): ResponseEntity<CompanyList> {
         val importedEntries = csvService.uploadCsvFile(file)
 
         return ResponseEntity.ok(importedEntries)
+    }
+
+    @GetMapping(value = ["/healthz"])
+    fun index(): ResponseEntity<*> {
+        val result = Healthz()
+        result.message = "Service upload csv is fine !!!"
+        return ResponseEntity.ok(result)
     }
 
 }
